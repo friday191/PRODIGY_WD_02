@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-image: url('PRODIGY_WD_01/fb-stopwatch2.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        #stopwatch-container {
+            background-color: transparent;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(20px);
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        #stopwatch {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color:rgb(255, 0, 0);
+        }
+
+        #controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #lapTimes {
+            text-align: left;
+            max-width: 300px;
+            margin: 0 auto;
+            margin-top: 20px;
+            color: #333;
+        }
+
+        .lapTime {
+            margin: 5px 0;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="stopwatch-container">
+        <h1>Stopwatch!</h1>
+
+        <div id="stopwatch">00:00:00.000</div>
+        <div id="controls">
+            <button id="startButton" onclick="startStopwatch()">Start</button>
+            <button id="pauseButton" onclick="pauseStopwatch()" disabled>Pause</button>
+            <button id="resumeButton" onclick="resumeStopwatch()" disabled>Resume</button>
+            <button id="resetButton" onclick="resetStopwatch()" disabled>Reset</button>
+            <button id="lapButton" onclick="recordLap()" disabled>Lap</button>
+        </div>
+
+        <div id="lapTimes"></div>
+    </div>
+
+    <script>
+        let stopwatchInterval;
+        let stopwatchRunning = false;
+        let stopwatchPaused = false;
+        let milliseconds = 0;
+        let lapCounter = 1;
+
+        function startStopwatch() {
+            if (!stopwatchRunning) {
+                stopwatchInterval = setInterval(updateStopwatch, 10);
+                stopwatchRunning = true;
+                document.getElementById('startButton').disabled = true;
+                document.getElementById('pauseButton').disabled = false;
+                document.getElementById('resetButton').disabled = false;
+                document.getElementById('resumeButton').disabled = true;
+                document.getElementById('lapButton').disabled = false;
+            }
+        }
+
+        function pauseStopwatch() {
+            if (stopwatchRunning && !stopwatchPaused) {
+                clearInterval(stopwatchInterval);
+                stopwatchPaused = true;
+                document.getElementById('pauseButton').disabled = true;
+                document.getElementById('resumeButton').disabled = false;
+                document.getElementById('lapButton').disabled = true;
+            }
+        }
+
+        function resumeStopwatch() {
+            if (stopwatchPaused) {
+                stopwatchInterval = setInterval(updateStopwatch, 10);
+                stopwatchPaused = false;
+                document.getElementById('pauseButton').disabled = false;
+                document.getElementById('resumeButton').disabled = true;
+                document.getElementById('lapButton').disabled = false;
+            }
+        }
+
+        function resetStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchRunning = false;
+            stopwatchPaused = false;
+            milliseconds = 0;
+            lapCounter = 1;
+            updateStopwatch();
+            document.getElementById('startButton').disabled = false;
+            document.getElementById('pauseButton').disabled = true;
+            document.getElementById('resetButton').disabled = true;
+            document.getElementById('resumeButton').disabled = true;
+            document.getElementById('lapButton').disabled = true;
+            document.getElementById('lapTimes').innerHTML = '';
+        }
+
+        function updateStopwatch() {
+            const hours = Math.floor(milliseconds / 3600000);
+            const minutes = Math.floor((milliseconds % 3600000) / 60000);
+            const seconds = Math.floor((milliseconds % 60000) / 1000);
+            const remainingMilliseconds = milliseconds % 1000;
+
+            document.getElementById('stopwatch').textContent = `${formatTime(hours)}:${formatTime(minutes)}:${formatTime(seconds)}.${formatMilliseconds(remainingMilliseconds)}`;
+            milliseconds += 10;
+        }
+
+        function formatTime(time) {
+            return time < 10 ? `0${time}` : time;
+        }
+
+        function formatMilliseconds(milliseconds) {
+            return milliseconds < 10 ? `00${milliseconds}` : milliseconds < 100 ? `0${milliseconds}` : milliseconds;
+        }
+
+        function recordLap() {
+            if (stopwatchRunning && !stopwatchPaused) {
+                const lapTimesContainer = document.getElementById('lapTimes');
+                const lapTimeElement = document.createElement('p');
+                lapTimeElement.className = 'lapTime';
+                lapTimeElement.textContent = `Lap ${lapCounter}: ${document.getElementById('stopwatch').textContent}`;
+                lapTimesContainer.prepend(lapTimeElement);
+                lapCounter++;
+            }
+        }
+    </script>
+</body>
+
+</html>
+
